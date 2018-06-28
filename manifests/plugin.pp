@@ -44,15 +44,16 @@
 #   Default: false
 #   Valid values: true, false
 define sensu::plugin(
-  $type               = 'file',
-  $install_path       = '/etc/sensu/plugins',
-  $purge              = true,
-  $recurse            = true,
-  $force              = true,
-  $pkg_version        = 'latest',
-  $pkg_provider       = $::sensu::sensu_plugin_provider,
-  $pkg_checksum       = undef,
-  $nocheckcertificate = false,
+  $type                = 'file',
+  $install_path        = '/etc/sensu/plugins',
+  $purge               = true,
+  $recurse             = true,
+  $force               = true,
+  $pkg_version         = 'latest',
+  $pkg_provider        = $::sensu::sensu_plugin_provider,
+  $pkg_checksum        = undef,
+  $nocheckcertificate  = false,
+  $gem_install_options = $::sensu::gem_install_options,
 ){
 
   File {
@@ -122,9 +123,16 @@ define sensu::plugin(
       }
     }
     'package':    {
+      $gem_install_options_real = $pkg_provider ? {
+        'gem'       => $gem_install_options,
+        'sensu_gem' => $gem_install_options,
+        default     => undef,
+      }
+
       package { $name:
-        ensure   => $pkg_version,
-        provider => $pkg_provider,
+        ensure          => $pkg_version,
+        provider        => $pkg_provider,
+        install_options => $gem_install_options_real,
       }
     }
     default:      {
